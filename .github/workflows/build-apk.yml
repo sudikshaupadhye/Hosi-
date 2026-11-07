@@ -15,23 +15,23 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - name: Install tools
-        run: npm install
-      - name: Create the Android project
-        run: npx cap add android
-      - name: App icon
-        continue-on-error: true
-        run: npx capacitor-assets generate --android --assetPath assets
-      - name: Copy the web app in
-        run: npx cap sync android
       - name: Build the APK
-        working-directory: android
         run: |
+          set -e
+          CFG=$(find . -name capacitor.config.json -not -path "*/node_modules/*" | head -1)
+          if [ -z "$CFG" ]; then echo "capacitor.config.json not found. Files in repo:"; find . -maxdepth 3 -not -path "./.git/*" | head -50; exit 1; fi
+          cd "$(dirname "$CFG")"
+          npm install
+          npx cap add android
+          npx capacitor-assets generate --android --assetPath assets || echo "icon step skipped"
+          npx cap sync android
+          cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-      - name: Upload the APK
-        uses: actions/upload-artifact@v4
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/out/Hoshi.apk"
+      - uses: actions/upload-artifact@v4
         with:
           name: Hoshi-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: out/Hoshi.apk
           if-no-files-found: error

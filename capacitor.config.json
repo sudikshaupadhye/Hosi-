@@ -1,0 +1,7 @@
+{
+  "appId": "com.hoshi.tracker",
+  "appName": "Hoshi",
+  "webDir": "www",
+  "backgroundColor": "#FFF3DC",
+  "android": { "allowMixedContent": false }
+}
